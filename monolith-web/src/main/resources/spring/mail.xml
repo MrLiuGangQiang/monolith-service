@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans 
+						http://www.springframework.org/schema/beans/spring-beans.xsd  ">
+
+	<!-- 邮件发送器 -->
+	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+		<!-- 协议类型 -->
+		<property name="protocol" value="${mail.smtp.type}" />
+		<!-- 服务器地址 -->
+		<property name="host" value="${mail.smtp.host}" />
+		<!-- 服务器端口 -->
+		<property name="port" value="${mail.smtp.port}" />
+		<!--用户名 -->
+		<property name="username" value="${mail.username}" />
+		<!-- 用户密码 -->
+		<property name="password" value="${mail.password}" />
+		<!-- 默认编码 -->
+		<property name="defaultEncoding" value="UTF-8" />
+		<!-- 其他配置 -->
+		<property name="javaMailProperties">
+			<props>
+				<!--是否验证密码 -->
+				<prop key="mail.smtp.auth">${mail.smtp.auth}</prop>
+				<!-- 超时时间 -->
+				<prop key="mail.smtp.timeout">${mail.smtp.timeout}</prop>
+				<!-- SSL类配置 -->
+				<prop key="mail.smtp.socketFactory.class">javax.net.ssl.SSLSocketFactory</prop>
+				<!-- 是否开启STARTTLS验证 -->
+				<prop key="mail.smtp.starttls.enable">${mail.smtp.starttls}</prop>
+			</props>
+		</property>
+	</bean>
+</beans>

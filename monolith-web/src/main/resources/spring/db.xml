@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+						http://www.springframework.org/schema/beans/spring-beans.xsd 
+						http://www.springframework.org/schema/aop 
+						http://www.springframework.org/schema/aop/spring-aop.xsd 
+						http://www.springframework.org/schema/tx 
+						http://www.springframework.org/schema/tx/spring-tx.xsd ">
+
+	<!-- 动态数据源 -->
+	<bean id="dataSource" class="org.monolith.web.tools.db.DynamicDataSource">
+		<!-- 通过key-value关联数据源 -->
+		<property name="targetDataSources">
+			<map>
+				<entry value-ref="dataSourceOne" key="dataSourceOne" />
+				<entry value-ref="dataSourceTwo" key="dataSourceTwo" />
+			</map>
+		</property>
+		<property name="defaultTargetDataSource" ref="dataSourceOne" />
+	</bean>
+
+	<!-- 配置数据源(一) -->
+	<bean name="dataSourceOne" class="com.alibaba.druid.pool.DruidDataSource" destroy-method="close">
+		<!-- 基本配置 -->
+		<property name="driverClassName" value="${db1.driverClassName}" />
+		<property name="url" value="${db1.url}" />
+		<property name="username" value="${db1.user}" />
+		<property name="password" value="${db1.password}" />
+		<!-- 初始化时建立物理连接的个数 -->
+		<property name="initialSize" value="${db1.initialSize}" />
+		<!-- 最小连接池数 -->
+		<property name="minIdle" value="${db1.minIdle}" />
+		<!-- 最大连接池数量 -->
+		<property name="maxActive" value="${db1.maxActive}" />
+		<!-- 配置获取连接等待超时的时间 -->
+		<property name="maxWait" value="${db1.maxWait}" />
+	</bean>
+
+	<!-- 配置数据源(二) -->
+	<bean name="dataSourceTwo" class="com.alibaba.druid.pool.DruidDataSource" destroy-method="close">
+		<!-- 基本配置 -->
+		<property name="driverClassName" value="${db2.driverClassName}" />
+		<property name="url" value="${db2.url}" />
+		<property name="username" value="${db2.user}" />
+		<property name="password" value="${db2.password}" />
+		<!-- 初始化时建立物理连接的个数 -->
+		<property name="initialSize" value="${db2.initialSize}" />
+		<!-- 最小连接池数 -->
+		<property name="minIdle" value="${db2.minIdle}" />
+		<!-- 最大连接池数量 -->
+		<property name="maxActive" value="${db2.maxActive}" />
+		<!-- 配置获取连接等待超时的时间 -->
+		<property name="maxWait" value="${db2.maxWait}" />
+	</bean>
+
+	<!-- 配置sqlSessionFactory(由mybatis-spring.jar提供支持) -->
+	<bean name="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<!-- 配置数据源 -->
+		<property name="dataSource" ref="dataSource" />
+		<!-- 配置mybatis的默认选项 -->
+		<property name="configuration" ref="configuration" />
+		<!-- 注意其他配置 -->
+		<property name="plugins">
+			<array>
+				<bean class="com.github.pagehelper.PageInterceptor">
+					<property name="properties">
+						<!--使用下面的方式配置参数，一行配置一个 -->
+						<value>
+							<!-- 分页合理化 -->
+							reasonable=true
+							supportMethodsArguments=true
+							params=count=countSql
+							autoRuntimeDialect=true
+						</value>
+					</property>
+				</bean>
+			</array>
+		</property>
+	</bean>
+
+	<!-- 支持注解事务模式 -->
+	<tx:annotation-driven transaction-manager="transactionManager" proxy-target-class="true" />
+
+	<!-- 事务管理 -->
+	<bean name="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<!-- 配置声明式事务 -->
+	<tx:advice id="txAdvice" transaction-manager="transactionManager">
+		<tx:attributes>
+			<tx:method name="insert*" propagation="REQUIRED" read-only="false" rollback-for="java.lang.Exception" />
+			<tx:method name="delete*" propagation="REQUIRED" read-only="false" rollback-for="java.lang.Exception" />
+			<tx:method name="update*" propagation="REQUIRED" read-only="false" rollback-for="java.lang.Exception" />
+			<tx:method name="get*" propagation="SUPPORTS" read-only="true" />
+		</tx:attributes>
+	</tx:advice>
+
+	<!-- 配置该声明式事务规则用于的切入点 步骤： 1.配置切入点 2.应用该声明式事务规则 -->
+	<aop:config proxy-target-class="true" expose-proxy="true">
+		<!-- 配置切入点 -->
+		<aop:pointcut id="transaction_pointcut" expression="execution(* org.monolith.web.system.service..*.*(..))" />
+		<!-- 应用该声明式事务规则 -->
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="transaction_pointcut" order="2" />
+	</aop:config>
+</beans>

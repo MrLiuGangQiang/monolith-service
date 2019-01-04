@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:cache="http://www.springframework.org/schema/cache"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+						http://www.springframework.org/schema/beans/spring-beans.xsd 
+						http://www.springframework.org/schema/cache 
+						http://www.springframework.org/schema/cache/spring-cache-3.2.xsd">
+
+	<!-- redis pool相关配置 -->
+	<bean id="poolConfig" class="redis.clients.jedis.JedisPoolConfig">
+		<!-- 最小空闲数 -->
+		<property name="minIdle" value="${redis.minIdle}" />
+		<!-- 最大空闲数 -->
+		<property name="maxIdle" value="${redis.maxIdle}" />
+		<!-- 最大连接数 -->
+		<property name="maxTotal" value="${redis.maxTotal}" />
+		<!-- 最大等待时间 单位毫秒（ms） -->
+		<property name="maxWaitMillis" value="${redis.maxWaitMillis}" />
+		<!-- 使用连接时测试连接是否可用 -->
+		<property name="testOnBorrow" value="${redis.testOnBorrow}" />
+	</bean>
+
+	<!-- jedis客户端连接工厂 -->
+	<bean id="jedisConnectionFactory" class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory">
+		<property name="poolConfig" ref="poolConfig" />
+		<property name="database" value="${redis.database}" />
+		<property name="port" value="${redis.port}" />
+		<property name="hostName" value="${redis.host}" />
+		<property name="password" value="${redis.password}" />
+	</bean>
+
+	<!-- redisTemplate模板 -->
+	<bean id="redisTemplate" class="org.springframework.data.redis.core.RedisTemplate">
+		<property name="connectionFactory" ref="jedisConnectionFactory" />
+	</bean>
+
+	<!-- redis缓存管理器 -->
+	<bean id="cacheManager" class="org.monolith.redis.cache.RedisCacheManager">
+		<constructor-arg name="redisOperations" ref="redisTemplate" />
+		<!-- 是否事务提交，如果事务回滚，缓存也回滚，默认false -->
+		<property name="transactionAware" value="true" />
+		<!-- 设置缓存超时时间 已实现自动续期 如果不设置将永久存在 -->
+		<property name="expires">
+			<map>
+				<entry key="cache">
+					<bean class="org.monolith.redis.cache.RedisConfig">
+						<property name="expire" value="1800" />
+						<property name="isDelay" value="true" />
+					</bean>
+				</entry>
+			</map>
+		</property>
+	</bean>
+
+	<!-- 支持缓存注解 -->
+	<cache:annotation-driven cache-manager="cacheManager" />
+</beans>

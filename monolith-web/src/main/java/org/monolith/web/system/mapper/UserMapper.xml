@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.monolith.web.system.mapper.UserMapper">
+	<!-- 查询详情 -->
+	<select id="getList" parameterType="org.monolith.web.system.entity.User" resultType="map">
+		select * from user
+	</select>
+	<insert id="insert" parameterType="org.monolith.web.system.entity.User" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO `user`
+		( `name`,`sex`, `id_card`,`birthday`,`phone`, `province`, `city`, `area`,`street`, `lng`, `lat`,`address`, `create_date`, `update_date`,`remark`)
+		VALUES
+		(#{name},#{sex},#{idCard},#{birthday},#{phone},#{province},#{city},#{area},#{street},#{lng},#{lat},#{address},#{createDate},#{updateDate},#{remark})
+	</insert>
+	<delete id="delete" parameterType="org.monolith.web.system.entity.User">
+		delete from user where id=#{id}
+	</delete>
+</mapper>

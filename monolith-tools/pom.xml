@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.monolith.service</groupId>
+		<artifactId>monolith-service</artifactId>
+		<version>20180110.Alpha</version>
+	</parent>
+	<artifactId>monolith-tools</artifactId>
+	<name>monolith-tools</name>
+	<properties>
+		<base64.version>2.3.8</base64.version>
+	</properties>
+	<dependencies>
+		<!-- Base64相关包 -->
+		<dependency>
+			<groupId>net.iharder</groupId>
+			<artifactId>base64</artifactId>
+			<version>${base64.version}</version>
+		</dependency>
+	</dependencies>
+	<build>
+		<finalName>monolith-tools</finalName>
+	</build>
+</project>

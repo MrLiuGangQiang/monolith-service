@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:task="http://www.springframework.org/schema/task"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:cache="http://www.springframework.org/schema/cache"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:c="http://www.springframework.org/schema/c"
+	xsi:schemaLocation="
+						http://www.springframework.org/schema/beans 
+						http://www.springframework.org/schema/beans/spring-beans.xsd 
+						http://www.springframework.org/schema/context 
+						http://www.springframework.org/schema/context/spring-context.xsd 
+						http://www.springframework.org/schema/aop 
+						http://www.springframework.org/schema/aop/spring-aop.xsd 
+						http://www.springframework.org/schema/task 
+						http://www.springframework.org/schema/task/spring-task-3.1.xsd ">
+
+	<!-- 配置需要交给spring扫描管理的包,一般是包括整个项目的java文件的父包（由context提供） -->
+	<context:component-scan base-package="org.monolith.web.system" />
+	<!-- 开启AOP注解代理 -->
+	<aop:aspectj-autoproxy  />
+
+	<!-- 配置需要交给spring扫描管理的文件,一般是项目的配置文件（由context提供） -->
+	<context:property-placeholder location="classpath:conf.properties" />
+
+	<!--开启这个配置，spring才能识别@Scheduled注解 -->
+	<task:scheduler id="scheduler" pool-size="10" />
+	<task:executor id="executor" pool-size="5-10" queue-capacity="200" rejection-policy="CALLER_RUNS" />
+	<task:annotation-driven executor="executor" scheduler="scheduler" />
+
+	<!-- Spring上下文工具类 -->
+	<bean id="springContextUtil" class="org.monolith.web.tools.spring.SpringContextUtils" />
+	<!-- 异常拦截器 -->
+	<bean id="exceptionHandler" class="org.monolith.web.system.exception.ExceptionResolver" />
+</beans>
